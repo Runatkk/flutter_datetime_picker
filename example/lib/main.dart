@@ -11,9 +11,21 @@ class CustomPicker extends CommonPickerModel {
   CustomPicker({DateTime? currentTime, LocaleType? locale})
       : super(locale: locale) {
     this.currentTime = currentTime ?? DateTime.now();
+    //ADD:Runa
+    this.setveryLeftIndex(this.currentTime.day);
     this.setLeftIndex(this.currentTime.hour);
     this.setMiddleIndex(this.currentTime.minute);
     this.setRightIndex(this.currentTime.second);
+  }
+
+  //ADD:Runa
+  @override
+  String? veryLeftStringAtIndex(int index) {
+    if (index >= 0 && index < 24) {
+      return this.digits(index, 2);
+    } else {
+      return null;
+    }
   }
 
   @override
@@ -44,18 +56,23 @@ class CustomPicker extends CommonPickerModel {
   }
 
   @override
-  String leftDivider() {
+  String veryLeftDivider() {
     return "|";
+  }
+
+  @override
+  String leftDivider() {
+    return ":";
   }
 
   @override
   String rightDivider() {
-    return "|";
+    return "-";
   }
 
   @override
   List<int> layoutProportions() {
-    return [1, 2, 1];
+    return [1, 1, 1, 1];
   }
 
   @override
@@ -65,6 +82,8 @@ class CustomPicker extends CommonPickerModel {
             currentTime.year,
             currentTime.month,
             currentTime.day,
+            currentTime.hour,
+            this.currentveryLeftIndex(),
             this.currentLeftIndex(),
             this.currentMiddleIndex(),
             this.currentRightIndex())
@@ -72,6 +91,8 @@ class CustomPicker extends CommonPickerModel {
             currentTime.year,
             currentTime.month,
             currentTime.day,
+            currentTime.hour,
+            this.currentveryLeftIndex(),
             this.currentLeftIndex(),
             this.currentMiddleIndex(),
             this.currentRightIndex());
@@ -108,7 +129,7 @@ class HomePage extends StatelessWidget {
                       showTitleActions: true,
                       minTime: DateTime(2018, 3, 5),
                       maxTime: DateTime(2019, 6, 7),
-                      theme: DatePickerTheme(
+                      theme: FlutterDatePickerTheme(
                           headerColor: Colors.orange,
                           backgroundColor: Colors.blue,
                           itemStyle: TextStyle(
@@ -180,7 +201,7 @@ class HomePage extends StatelessWidget {
                         date.timeZoneOffset.inHours.toString());
                   }, onConfirm: (date) {
                     print('confirm $date');
-                  }, currentTime: DateTime(2008, 12, 31, 23, 12, 34));
+                  }, currentTime: DateTime.now());
                 },
                 child: Text(
                   'show date time picker (English-America)',
@@ -191,7 +212,7 @@ class HomePage extends StatelessWidget {
                   DatePicker.showDateTimePicker(context, showTitleActions: true,
                       onChanged: (date) {
                     print('change $date in time zone ' +
-                        date.timeZoneOffset.inHours.toString());
+                        date.timeZoneOffset.inHours.toString() );
                   }, onConfirm: (date) {
                     print('confirm $date');
                   },

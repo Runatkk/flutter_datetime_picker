@@ -30,7 +30,7 @@ class DatePicker {
     DateCancelledCallback? onCancel,
     locale: LocaleType.en,
     DateTime? currentTime,
-    DatePickerTheme? theme,
+    FlutterDatePickerTheme? theme,
   }) async {
     return await Navigator.push(
       context,
@@ -65,7 +65,7 @@ class DatePicker {
     DateCancelledCallback? onCancel,
     locale: LocaleType.en,
     DateTime? currentTime,
-    DatePickerTheme? theme,
+    FlutterDatePickerTheme? theme,
   }) async {
     return await Navigator.push(
       context,
@@ -98,7 +98,7 @@ class DatePicker {
     DateCancelledCallback? onCancel,
     locale: LocaleType.en,
     DateTime? currentTime,
-    DatePickerTheme? theme,
+    FlutterDatePickerTheme? theme,
   }) async {
     return await Navigator.push(
       context,
@@ -132,7 +132,7 @@ class DatePicker {
     DateCancelledCallback? onCancel,
     locale: LocaleType.en,
     DateTime? currentTime,
-    DatePickerTheme? theme,
+    FlutterDatePickerTheme? theme,
   }) async {
     return await Navigator.push(
       context,
@@ -166,7 +166,7 @@ class DatePicker {
     DateCancelledCallback? onCancel,
     locale: LocaleType.en,
     BasePickerModel? pickerModel,
-    DatePickerTheme? theme,
+    FlutterDatePickerTheme? theme,
   }) async {
     return await Navigator.push(
       context,
@@ -191,13 +191,13 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
     this.onChanged,
     this.onConfirm,
     this.onCancel,
-    DatePickerTheme? theme,
+    FlutterDatePickerTheme? theme,
     this.barrierLabel,
     this.locale,
     RouteSettings? settings,
     BasePickerModel? pickerModel,
   })  : this.pickerModel = pickerModel ?? DatePickerModel(),
-        this.theme = theme ?? DatePickerTheme(),
+        this.theme = theme ?? FlutterDatePickerTheme(),
         super(settings: settings);
 
   final bool? showTitleActions;
@@ -205,7 +205,7 @@ class _DatePickerRoute<T> extends PopupRoute<T> {
   final DateChangedCallback? onConfirm;
   final DateCancelledCallback? onCancel;
   final LocaleType? locale;
-  final DatePickerTheme theme;
+  final FlutterDatePickerTheme theme;
   final BasePickerModel pickerModel;
 
   @override
@@ -271,7 +271,9 @@ class _DatePickerComponent extends StatefulWidget {
 }
 
 class _DatePickerState extends State<_DatePickerComponent> {
-  late FixedExtentScrollController leftScrollCtrl,
+  late FixedExtentScrollController
+  veryLeftScrollCtrl,
+      leftScrollCtrl,
       middleScrollCtrl,
       rightScrollCtrl;
 
@@ -283,6 +285,8 @@ class _DatePickerState extends State<_DatePickerComponent> {
 
   void refreshScrollOffset() {
 //    print('refreshScrollOffset ${widget.pickerModel.currentRightIndex()}');
+    veryLeftScrollCtrl = FixedExtentScrollController(
+        initialItem: widget.pickerModel.currentveryLeftIndex());
     leftScrollCtrl = FixedExtentScrollController(
         initialItem: widget.pickerModel.currentLeftIndex());
     middleScrollCtrl = FixedExtentScrollController(
@@ -293,7 +297,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
 
   @override
   Widget build(BuildContext context) {
-    DatePickerTheme theme = widget.route.theme;
+    FlutterDatePickerTheme theme = widget.route.theme;
     return GestureDetector(
       child: AnimatedBuilder(
         animation: widget.route.animation!,
@@ -326,7 +330,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
     }
   }
 
-  Widget _renderPickerView(DatePickerTheme theme) {
+  Widget _renderPickerView(FlutterDatePickerTheme theme) {
     Widget itemView = _renderItemView(theme);
     if (widget.route.showTitleActions == true) {
       return Column(
@@ -341,7 +345,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
 
   Widget _renderColumnView(
     ValueKey key,
-    DatePickerTheme theme,
+    FlutterDatePickerTheme theme,
     StringAtIndexCallBack stringAtIndexCB,
     ScrollController scrollController,
     int layoutProportion,
@@ -351,7 +355,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
     return Expanded(
       flex: layoutProportion,
       child: Container(
-        padding: EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(0.0),
         height: theme.containerHeight,
         decoration: BoxDecoration(color: theme.backgroundColor),
         child: NotificationListener(
@@ -396,7 +400,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
     );
   }
 
-  Widget _renderItemView(DatePickerTheme theme) {
+  Widget _renderItemView(FlutterDatePickerTheme theme) {
     return Container(
       color: theme.backgroundColor,
       child: Directionality(
@@ -407,11 +411,29 @@ class _DatePickerState extends State<_DatePickerComponent> {
             Container(
               child: widget.pickerModel.layoutProportions()[0] > 0
                   ? _renderColumnView(
-                      ValueKey(widget.pickerModel.currentLeftIndex()),
+                  ValueKey("DateColumn"),
+                  theme,
+                  widget.pickerModel.veryLeftStringAtIndex,
+                  veryLeftScrollCtrl,
+                  widget.pickerModel.layoutProportions()[0], (index) {
+                widget.pickerModel.setveryLeftIndex(index);
+              }, (index) {
+                setState(() {
+                  refreshScrollOffset();
+                  _notifyDateChanged();
+                });
+              })
+                  : null,
+            ),
+
+            Container(
+              child: widget.pickerModel.layoutProportions()[1] > 0
+                  ? _renderColumnView(
+                      ValueKey("HourColumn"),
                       theme,
                       widget.pickerModel.leftStringAtIndex,
                       leftScrollCtrl,
-                      widget.pickerModel.layoutProportions()[0], (index) {
+                      widget.pickerModel.layoutProportions()[1], (index) {
                       widget.pickerModel.setLeftIndex(index);
                     }, (index) {
                       setState(() {
@@ -426,9 +448,9 @@ class _DatePickerState extends State<_DatePickerComponent> {
               style: theme.itemStyle,
             ),
             Container(
-              child: widget.pickerModel.layoutProportions()[1] > 0
+              child: widget.pickerModel.layoutProportions()[2] > 0
                   ? _renderColumnView(
-                      ValueKey(widget.pickerModel.currentLeftIndex()),
+                      ValueKey("MinColumn"),
                       theme,
                       widget.pickerModel.middleStringAtIndex,
                       middleScrollCtrl,
@@ -447,10 +469,9 @@ class _DatePickerState extends State<_DatePickerComponent> {
               style: theme.itemStyle,
             ),
             Container(
-              child: widget.pickerModel.layoutProportions()[2] > 0
+              child: widget.pickerModel.layoutProportions()[3] > 0
                   ? _renderColumnView(
-                      ValueKey(widget.pickerModel.currentMiddleIndex() * 100 +
-                          widget.pickerModel.currentLeftIndex()),
+                      ValueKey("AMPMColumn"),
                       theme,
                       widget.pickerModel.rightStringAtIndex,
                       rightScrollCtrl,
@@ -471,7 +492,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
   }
 
   // Title View
-  Widget _renderTitleActionsView(DatePickerTheme theme) {
+  Widget _renderTitleActionsView(FlutterDatePickerTheme theme) {
     final done = _localeDone();
     final cancel = _localeCancel();
 
@@ -543,7 +564,7 @@ class _BottomPickerLayout extends SingleChildLayoutDelegate {
   final double progress;
   final int? itemCount;
   final bool? showTitleActions;
-  final DatePickerTheme theme;
+  final FlutterDatePickerTheme theme;
   final double bottomPadding;
 
   @override
