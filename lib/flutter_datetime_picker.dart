@@ -536,6 +536,7 @@ class _DatePickerState extends State<_DatePickerComponent> {
                   widget.route.onConfirm!(widget.pickerModel.finalTime()!);
                 }
               },
+              key: ValueKey('Done-button'),
             ),
           ),
         ],
